@@ -1,0 +1,7 @@
+name = Auto Menu Settings
+description = Automates the creation of menu items for nodes.
+backdrop = 1.x
+type = module
+package = Menu
+dependencies[] = menu
+

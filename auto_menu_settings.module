@@ -1,0 +1,106 @@
+<?php
+/**
+ * @file
+ * Automates the creation of menu items for nodes.
+ */
+
+/**
+ * Implements hook_node_type_load().
+ */
+function auto_menu_settings_node_type_load(&$types) {
+  foreach ($types as $type_name => $type) {
+    $types[$type_name]->settings += array(
+      'auto_menu_settings_default' => FALSE,
+      'auto_menu_settings_title' => '[node:title]',
+      'auto_menu_settings_fields' => backdrop_map_assoc(array('provide', 'title', 'description', 'parent', 'weight')),
+    );
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_type_form.
+ */
+function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
+  $settings = $form['#node_type']->settings;
+  $token_link = theme('token_tree_link', array(
+    'token_types' => array('node'),
+    'text' => t('tokens'),
+  ));
+
+  $form['menu']['auto_menu_settings_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Provide a default menu link'),
+    '#description' => t("Set the default value of the 'Provide a menu link' checkbox on the node form."),
+    '#default_value' => $settings['auto_menu_settings_default'],
+    '#weight' => -5,
+  );
+  $form['menu']['auto_menu_settings_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default menu link title'),
+    '#description' => t("Set the default value of the 'Menu link title' field on the node form. This field supports ") . $token_link . '.',
+    '#default_value' => $settings['auto_menu_settings_title'],
+    '#weight' => -4,
+    '#element_validate' => array('token_element_validate'),
+    '#token_types' => array('node'),
+  );
+  $form['menu']['auto_menu_settings_fields'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Visible fields'),
+    '#description' => t('Show these fields to the node author. Untick fields to hide them.'),
+    '#options' => array(
+      'provide' => t("'Provide a menu link' checkbox"),
+      'title' => t("'Menu link title' textfield"),
+      'description' => t("'Description' textfield"),
+      'parent' => t("'Parent item' select list"),
+      'weight' => t("'Weight' select list"),
+    ),
+    '#default_value' => $settings['auto_menu_settings_fields'],
+    '#weight' => 5,
+  );
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ */
+function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
+  $node_type = node_type_get_type($form['#node']->type);
+
+  if (empty($form['#node']->menu['link_title'])) {
+    // Set the default 'Provide a menu link' value.
+    if ($form['menu']['enabled']['#default_value'] != $node_type->settings['auto_menu_settings_default']) {
+      $form['menu']['enabled']['#default_value'] = $node_type->settings['auto_menu_settings_default'];
+    }
+
+    // Set the default 'Menu link title' value.
+    if ($form['menu']['link']['link_title']['#default_value'] != $node_type->settings['auto_menu_settings_title']) {
+      $form['menu']['link']['link_title']['#default_value'] = $node_type->settings['auto_menu_settings_title'];
+    }
+  }
+
+  // Hide fields.
+  foreach ($node_type->settings['auto_menu_settings_fields'] as $id => $value) {
+    if (!$value) {
+      switch ($id) {
+        case 'provide':
+          $form['menu']['enabled']['#access'] = FALSE;
+        break;
+        case 'title':
+          $form['menu']['link']['link_title']['#access'] = FALSE;
+        break;
+        case 'description':
+          $form['menu']['link']['description']['#access'] = FALSE;
+        break;
+        case 'parent':
+          $form['menu']['link']['parent']['#access'] = FALSE;
+        break;
+        case 'weight':
+          $form['menu']['link']['weight']['#access'] = FALSE;
+        break;
+      }
+    }
+  }
+}
+
+// Add comment to blank Menu Settings tab explaining why it's blank
+// TODO: Process tokens in menu link title
+

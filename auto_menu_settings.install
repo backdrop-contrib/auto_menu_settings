@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Auto Menu Settings module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function auto_menu_settings_install() {
+  // Update module weight (to run after Menu module).
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'auto_menu_settings')
+    ->execute();
+}
+
