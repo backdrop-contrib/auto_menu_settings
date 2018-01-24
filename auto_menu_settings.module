@@ -72,6 +72,14 @@ function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
   ));
   $form['menu']['link']['link_title']['#description'] = t('This field supports ') . $token_link . '.';
 
+  // Override the Menu Settings fieldset summary.
+  foreach ($form['menu']['#attached']['js'] as $key => $value) {
+    if ($value == backdrop_get_path('module', 'menu') . '/js/menu.js') {
+      $form['menu']['#attached']['js'][$key] = backdrop_get_path('module', 'auto_menu_settings') . '/js/auto_menu_settings.js';
+      break;
+    }
+  }
+
   if (empty($form['#node']->menu['link_title'])) {
     // Set the default 'Provide a menu link' value.
     if ($form['menu']['enabled']['#default_value'] != $node_type->settings['auto_menu_settings_default']) {
@@ -153,4 +161,3 @@ function auto_menu_settings_node_submit(Node $node, $form, &$form_state) {
   }
 }
 
-// TODO: Fix 'Not in menu' description on vertical tab on node form (JS)
