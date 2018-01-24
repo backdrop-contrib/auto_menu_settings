@@ -65,6 +65,13 @@ function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
 function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
   $node_type = node_type_get_type($form['#node']->type);
 
+  // Enable tokens on the 'Menu link title' field.
+  $token_link = theme('token_tree_link', array(
+    'token_types' => array('node'),
+    'text' => t('tokens'),
+  ));
+  $form['menu']['link']['link_title']['#description'] = t('This field supports ') . $token_link . '.';
+
   if (empty($form['#node']->menu['link_title'])) {
     // Set the default 'Provide a menu link' value.
     if ($form['menu']['enabled']['#default_value'] != $node_type->settings['auto_menu_settings_default']) {
@@ -134,5 +141,16 @@ function _menu_fields_hidden($fields) {
   return TRUE;
 }
 
-// TODO: Process tokens in menu link title
+/**
+ * Implements hook_node_submit().
+ */
+function auto_menu_settings_node_submit(Node $node, $form, &$form_state) {
+  $menu = $form_state['values']['menu'];
 
+  // Replace tokens in the menu link title.
+  if ($menu['enabled']) {
+    $node->menu['link_title'] = token_replace($menu['link_title'], array('node' => $node));
+  }
+}
+
+// TODO: Fix 'Not in menu' description on vertical tab on node form (JS)
