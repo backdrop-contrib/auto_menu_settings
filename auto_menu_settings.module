@@ -99,8 +99,40 @@ function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
       }
     }
   }
+
+  if (empty(array_filter($node_type->settings['auto_menu_settings_fields']))) {
+    if (user_access('administer content types')) {
+      // Add message explaining why Menu Settings tab is empty.
+      $form['menu']['auto_menu_settings_message'] = array(
+        '#markup' => '<p>' . t('Menu settings have been hidden by the content type <a href="/admin/structure/types/manage/' . $node_type->type . '">configuration</a>.') . '</p>',
+        '#weight' => -10,
+      );
+    }
+    else {
+      // Hide Menu Settings tab if empty.
+      if (_menu_fields_hidden($form['menu'])) {
+        $form['menu']['#access'] = FALSE;
+      }
+    }
+  }
 }
 
-// Add comment to blank Menu Settings tab explaining why it's blank
+/**
+ * Check all menu fields to see if they're hidden or not.
+ */
+function _menu_fields_hidden($fields) {
+  foreach (element_children($fields) as $field) {
+    if ($fields[$field]['#type'] == 'container') {
+      _menu_fields_hidden($fields[$field]);
+    }
+
+    if (isset($fields[$field]['#access']) && $fields[$field]['#access'] == TRUE) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
 // TODO: Process tokens in menu link title
 
