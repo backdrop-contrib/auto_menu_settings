@@ -30,14 +30,14 @@ function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
   $form['menu']['auto_menu_settings_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Provide a default menu link'),
-    '#description' => t("Set the default value of the 'Provide a menu link' checkbox on the node form."),
+    '#description' => t("Set the default value of the 'Provide a menu link' checkbox on the content authoring form."),
     '#default_value' => $settings['auto_menu_settings_default'],
     '#weight' => -5,
   );
   $form['menu']['auto_menu_settings_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Default menu link title'),
-    '#description' => t("Set the default value of the 'Menu link title' field on the node form. This field supports ") . $token_link . '.',
+    '#description' => t("Set the default value of the 'Menu link title' field on the content authoring form. This field supports ") . $token_link . '.',
     '#default_value' => $settings['auto_menu_settings_title'],
     '#weight' => -4,
     '#element_validate' => array('token_element_validate'),
@@ -46,7 +46,7 @@ function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
   $form['menu']['auto_menu_settings_fields'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Visible fields'),
-    '#description' => t('Show these fields to the node author. Untick fields to hide them.'),
+    '#description' => t('Show these fields to the content author. Untick fields to hide them.'),
     '#options' => array(
       'provide' => t("'Provide a menu link' checkbox"),
       'title' => t("'Menu link title' textfield"),
