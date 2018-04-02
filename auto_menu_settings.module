@@ -63,7 +63,15 @@ function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
  * Implements hook_form_BASE_FORM_ID_alter() for node_form.
  */
 function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
-  $node_type = node_type_get_type($form['#node']->type);
+  // Exit if there are no menu parents.
+  // @see menu_form_node_form_alter()
+  $link = $form['#node']->menu;
+  $type = $form['#node']->type;
+  $node_type = node_type_load($type);
+  $options = menu_parent_options(menu_get_menus(), $link['mlid'] ? $link : $type, $type);
+  if (empty($options)) {
+    return;
+  }
 
   // Enable tokens on the 'Menu link title' field.
   $token_link = theme('token_tree_link', array(
@@ -153,11 +161,9 @@ function _menu_fields_hidden($fields) {
  * Implements hook_node_submit().
  */
 function auto_menu_settings_node_submit(Node $node, $form, &$form_state) {
-  $menu = $form_state['values']['menu'];
-
   // Replace tokens in the menu link title.
-  if ($menu['enabled']) {
-    $node->menu['link_title'] = token_replace($menu['link_title'], array('node' => $node));
+  if (!empty($form_state['values']['menu']['link_title'])) {
+    $node->menu['link_title'] = token_replace($form_state['values']['menu']['link_title'], array('node' => $node));
   }
 }
 
