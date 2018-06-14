@@ -89,8 +89,8 @@ function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
   }
 
   if (empty($form['#node']->menu['link_title'])) {
-    // Set the default 'Provide a menu link' value.
-    if ($form['menu']['enabled']['#default_value'] != $node_type->settings['auto_menu_settings_default']) {
+    // Set the default 'Provide a menu link' value for new nodes.
+    if (empty($form['#node']->nid) && $form['menu']['enabled']['#default_value'] != $node_type->settings['auto_menu_settings_default']) {
       $form['menu']['enabled']['#default_value'] = $node_type->settings['auto_menu_settings_default'];
     }
 
