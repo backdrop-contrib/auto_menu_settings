@@ -14,4 +14,3 @@ function auto_menu_settings_install() {
     ->condition('name', 'auto_menu_settings')
     ->execute();
 }
-

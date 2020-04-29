@@ -10,7 +10,6 @@
 function auto_menu_settings_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
-      'auto_menu_settings_default' => FALSE,
       'auto_menu_settings_title' => '[node:title]',
       'auto_menu_settings_fields' => backdrop_map_assoc(array('provide', 'title', 'description', 'parent', 'weight')),
     );
@@ -27,21 +26,18 @@ function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
     'text' => t('tokens'),
   ));
 
-  $form['menu']['auto_menu_settings_default'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Provide a default menu link'),
-    '#description' => t("Set the default value of the 'Provide a menu link' checkbox on the content authoring form."),
-    '#default_value' => $settings['auto_menu_settings_default'],
-    '#weight' => -5,
-  );
   $form['menu']['auto_menu_settings_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Default menu link title'),
     '#description' => t("Set the default value of the 'Menu link title' field on the content authoring form. This field supports ") . $token_link . '.',
     '#default_value' => $settings['auto_menu_settings_title'],
-    '#weight' => -4,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('node'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name^="menu_options"]' => array('checked' => TRUE),
+      ),
+    ),
   );
   $form['menu']['auto_menu_settings_fields'] = array(
     '#type' => 'checkboxes',
@@ -55,7 +51,11 @@ function auto_menu_settings_form_node_type_form_alter(&$form, $form_state) {
       'weight' => t("'Weight' select list"),
     ),
     '#default_value' => $settings['auto_menu_settings_fields'],
-    '#weight' => 5,
+    '#states' => array(
+      'visible' => array(
+        ':input[name^="menu_options"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 }
 
@@ -80,21 +80,8 @@ function auto_menu_settings_form_node_form_alter(&$form, $form_state) {
   ));
   $form['menu']['link']['link_title']['#description'] = t('This field supports ') . $token_link . '.';
 
-  // Override the Menu Settings fieldset summary.
-  foreach ($form['menu']['#attached']['js'] as $key => $value) {
-    if ($value == backdrop_get_path('module', 'menu') . '/js/menu.js') {
-      $form['menu']['#attached']['js'][$key] = backdrop_get_path('module', 'auto_menu_settings') . '/js/auto_menu_settings.js';
-      break;
-    }
-  }
-
+  // Set the default 'Menu link title' value.
   if (empty($form['#node']->menu['link_title'])) {
-    // Set the default 'Provide a menu link' value for new nodes.
-    if (empty($form['#node']->nid) && $form['menu']['enabled']['#default_value'] != $node_type->settings['auto_menu_settings_default']) {
-      $form['menu']['enabled']['#default_value'] = $node_type->settings['auto_menu_settings_default'];
-    }
-
-    // Set the default 'Menu link title' value.
     if ($form['menu']['link']['link_title']['#default_value'] != $node_type->settings['auto_menu_settings_title']) {
       $form['menu']['link']['link_title']['#default_value'] = $node_type->settings['auto_menu_settings_title'];
     }
@@ -166,4 +153,3 @@ function auto_menu_settings_node_submit(Node $node, $form, &$form_state) {
     $node->menu['link_title'] = token_replace($form_state['values']['menu']['link_title'], array('node' => $node));
   }
 }
-
