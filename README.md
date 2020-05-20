@@ -2,7 +2,10 @@ Auto Menu Settings
 ==================
 
 Adds content type settings that help automate the creation of menu items for
-nodes.
+nodes. These include:
+
+- Setting a default menu link title (with token support)
+- Choosing which menu fields/settings will be visible to content authors
 
 Installation
 ------------
