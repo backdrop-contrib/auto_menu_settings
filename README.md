@@ -7,6 +7,10 @@ nodes. These include:
 - Setting a default menu link title (with token support)
 - Choosing which menu fields/settings will be visible to content authors
 
+Backdrop core allows for the automatic creation of menu links for nodes, but the
+menu link title defaults to the node title. If you want your menu link titles to
+be based on a different field/property, this module is for you.
+
 Installation
 ------------
 
